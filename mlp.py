@@ -2,7 +2,6 @@ import torch
 from typing import List, Tuple
 from torch import nn
 
-
 class Linear(nn.Module):
     r"""Applies a linear transformation to the incoming data: :math:`y = xA^T + b`
     Args:
@@ -24,16 +23,16 @@ class Linear(nn.Module):
         super(Linear, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
-        self.weight = torch.randn(out_features, in_features)
-        self.bias = torch.zeros(out_features)
+        self.weight = nn.Parameter(torch.randn(out_features, in_features))
+        self.bias = nn.Parameter(torch.zeros(out_features))
     
     def forward(self, input):
         """
             :param input: [bsz, in_features]
             :return result [bsz, out_features]
         """
-        return input @ self.weight.T + self.bias
-
+        result = input @ self.weight.T + self.bias
+        return result
 
 class MLP(torch.nn.Module):
     def __init__(self, input_size: int, hidden_sizes: List[int], num_classes: int, activation: str = "relu"):
@@ -63,15 +62,23 @@ class MLP(torch.nn.Module):
             hidden_layers: nn.ModuleList. Within the list, each item has type nn.Module
             output_layer: nn.Module
         """
+
         raise NotImplementedError
     
     def activation_fn(self, activation, inputs: torch.Tensor) -> torch.Tensor:
         """ process the inputs through different non-linearity function according to activation name """
-        raise NotImplementedError
+        if activation == 'relu':
+            return torch.relu(inputs)
+        elif activation == 'tanh':
+            return torch.tanh(inputs)
+        elif activation == 'sigmoid':
+            return torch.sigmoid(inputs)
+        else return inputs
+
         
     def _initialize_linear_layer(self, module: nn.Linear) -> None:
         """ For bias set to zeros. For weights set to glorot normal """
-        raise NotImplementedError
+        torch.nn.init.xavier_normal(module.weight)
         
     def forward(self, images: torch.Tensor) -> torch.Tensor:
         """ Forward images and compute logits.
