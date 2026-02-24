@@ -19,10 +19,14 @@ def discrete_2d_convolution(image, kernel):
     pad_height = kernel_height // 2
     pad_width = kernel_width // 2
     # TODO: Pad the image with zeros on all sides
+    padded_image = np.pad(image, ((pad_height, pad_height), (pad_width, pad_width)), mode='constant')
 
     # TODO: perform the convolution operation
-
-    raise NotImplementedError
+    convoluted_image = np.zeros_like(image)
+    for i in range(image_height):
+        for j in range(image_width):
+            convoluted_image[i, j] = np.sum(padded_image[i:i+kernel_height, j:j+kernel_width] * kernel)
+    return convoluted_image
     
 
 class DiceLoss(nn.Module):
